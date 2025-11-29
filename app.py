@@ -123,7 +123,14 @@ def create_app(config_object=None):
             demo_res = [
                 Resource(name="Projector", category="AV", image="projector.jpg", quantity=3),
                 Resource(name="Wireless Mic", category="Audio", image="mic.jpg", quantity=10),
-                Resource(name="Decoration Lights", category="Decoration", image="lights.jpg", quantity=20)
+                Resource(name="Decoration Lights", category="Decoration", image="lights.jpg", quantity=20),
+                Resource(name="Sound System", category="Audio", image="sound.jpg", quantity=5),
+                Resource(name="Projector Screen", category="AV", image="screen.jpg", quantity=4),
+                Resource(name="Stage Setup", category="Furniture", image="stage.jpg", quantity=2),
+                Resource(name="PA System", category="Audio", image="pa.jpg", quantity=3),
+                Resource(name="Power Strips", category="Equipment", image="power.jpg", quantity=15),
+                Resource(name="Laptop Stand", category="Equipment", image="laptop.jpg", quantity=8),
+                Resource(name="Hall Setup", category="Furniture", image="hall.jpg", quantity=1)
             ]
             db.session.bulk_save_objects(demo_res)
             click.echo("Seeded sample resources.")
@@ -189,7 +196,14 @@ try:
                 demo_res = [
                     Resource(name="Projector", category="AV", image="projector.jpg", quantity=3),
                     Resource(name="Wireless Mic", category="Audio", image="mic.jpg", quantity=10),
-                    Resource(name="Decoration Lights", category="Decoration", image="lights.jpg", quantity=20)
+                    Resource(name="Decoration Lights", category="Decoration", image="lights.jpg", quantity=20),
+                    Resource(name="Sound System", category="Audio", image="sound.jpg", quantity=5),
+                    Resource(name="Projector Screen", category="AV", image="screen.jpg", quantity=4),
+                    Resource(name="Stage Setup", category="Furniture", image="stage.jpg", quantity=2),
+                    Resource(name="PA System", category="Audio", image="pa.jpg", quantity=3),
+                    Resource(name="Power Strips", category="Equipment", image="power.jpg", quantity=15),
+                    Resource(name="Laptop Stand", category="Equipment", image="laptop.jpg", quantity=8),
+                    Resource(name="Hall Setup", category="Furniture", image="hall.jpg", quantity=1)
                 ]
                 db.session.bulk_save_objects(demo_res)
             # Commit any new rows
