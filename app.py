@@ -102,7 +102,7 @@ def create_app(config_object=None):
             demo = [
                 Event(title="Ripples 2024", category="Ripples", date=date(2024,12,30),
                       location="Main Auditorium", image="ripples.jpg", description_short="Technical workshops and competitions.",
-                      description_long="Ripples long description...", team_size="Varies", fee="Free"),
+                      description_long="Ripples long description...", team_size="Varies", fee="300"),
                 Event(title="Expo 2024", category="Expo", date=date(2024,12,27),
                       location="Exhibition Hall D", image="expo.jpg", description_short="Showcasing innovative projects.",
                       description_long="Expo long description...", team_size="3-5 Members", fee="$500 per Team"),
