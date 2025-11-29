@@ -1,329 +1,44 @@
 # College Event & Resource System
 
-A lightweight Flask app for managing college events and resources (demo-ready).
-
-This project is a web application that allows students to register for college events and book campus resources easily. It provides a clean, modern interface with smooth animations and event details. Students can register for technical and non-technical events, while admins can manage bookings and approve or reject requests. The system makes event handling and resource allocation faster, clearer, and more organized.
-
-<!--- Combined README: Quickstart + Final Status + Admin Guide --->
-# College Event & Resource System
-
-A single-file documentation for the College Event & Resource System — a lightweight Flask application for managing college events, registrations, and resource bookings. This README consolidates setup, features, admin instructions, deployment notes, and troubleshooting into a single reference.
+A lightweight Flask app for managing college events and resources. This project enables students to register for college events and book campus resources through a clean, modern interface with smooth animations. Admins can manage bookings, approve/reject requests, and organize events efficiently.
 
 ---
 
-## Key Links
+## 🌐 Live Demo
 
-- Home (local): `http://127.0.0.1:5000/`
-- Events: `http://127.0.0.1:5000/events`
-- Resources: `http://127.0.0.1:5000/resources`
-- Admin Login: `http://127.0.0.1:5000/admin/login`
+**[View Live Application](https://event-hub-kqqy.onrender.com/events)**
 
 ---
 
-## Quickstart — Run locally (5 minutes)
-
-1. Open a PowerShell terminal and go to the project folder:
-
-```powershell
-cd "c:/Users/shais/Desktop/register & resources/college_event_system"
-```
-
-2. (Optional) Create & activate a virtual environment:
-
-```powershell
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-```
-
-3. Install dependencies:
-
-```powershell
-pip install -r requirements.txt
-```
-
-4. Seed the database (one-time):
-
-```powershell
-python seed_data.py
-```
-
-5. Run the app:
-
-```powershell
-python app.py
-# or
-python -m flask run
-```
-
-6. Open `http://127.0.0.1:5000` in your browser.
-
-Admin test credentials (seeded):
-
-```
-Email: admin@college.com
-Password: admin123
-```
-
----
-
-## Project Overview & Structure
-
-Top-level files you will work with:
-
-- `app.py` — Flask app factory / entrypoint
-- `config.py` — configuration (env override)
-- `models.py` — database models (`Event`, `Resource`, `User`, `Registration`, `Booking`)
-- `seed_data.py` — creates sample events, resources, and an admin user
-- `requirements.txt` — Python dependencies
-- `Dockerfile`, `Procfile` — helpers for containerized or Procfile-based deploys
-
-Key folders:
-
-- `blueprints/` — `events.py`, `resources.py`, `admin.py` (routing & view logic)
-- `templates/` — Jinja2 templates (UI)
-- `static/` — `css/`, `js/`, `img/` (assets)
-
-If you plan to push to GitHub, keep `venv/` out of version control (see `.gitignore`).
-
----
-
-## What’s Included (Features)
-
-- Event listing, detail pages, and AJAX registration modal
-- Resource listing, booking modal, date-range booking, conflict detection
-- Admin dashboard: view/approve/reject bookings and view registrations
-- Seed script with 5 sample events and 10 resources
-- Responsive dark theme with Bootstrap and AOS animations
-
----
-
-## How to Edit Event Details (date, location, fee, image)
-
-You can change event data in two ways:
-
-- Edit the seed file (for sample data):
-  - File: `seed_data.py`
-  - Modify the `events = [ Event(...), ... ]` block and either delete `app_data.db` and re-run `python seed_data.py`, or manually update the record in the DB.
-
-- Update an existing record in the running app using the Flask shell (recommended for single edits):
-
-```powershell
-python
->>> from app import create_app
->>> app = create_app()
->>> from models import db, Event
->>> ctx = app.app_context(); ctx.push()
->>> e = Event.query.filter_by(title="Ripples 2024").first()
->>> e.location = "New Location"
->>> from datetime import datetime
->>> e.date = datetime(2025, 12, 22).date()
->>> db.session.commit()
->>> ctx.pop()
-```
-
-Notes:
-- The `Event` model (in `models.py`) defines the available fields: `title`, `category`, `date`, `location`, `image`, `description_short`, `description_long`, `team_size`, `fee`.
-- If you change the category for an event (e.g., set `category="Ripples"`), specific UI logic that shows sub-events may trigger (see `blueprints/events.py`).
-
----
-
-## Admin Dashboard (login & common tasks)
-
-Admin login page: `http://127.0.0.1:5000/admin/login`
-
-Seeded admin credentials:
-
-```
-Email: admin@college.com
-Password: admin123
-```
-
-After login you can:
-
-- View pending bookings and registrations
-- Approve/Reject resource bookings
-- Manage resources (add/edit/delete)
-- View all events and registrations
-
-Create additional admins via the Flask shell (example in `ADMIN_LOGIN_GUIDE.md` before it was consolidated):
-
-```python
-from app import create_app
-from models import db, User
-
-app = create_app()
-with app.app_context():
-    admin = User(name="New Admin", email="admin2@college.com", is_admin=True)
-    admin.set_password("newpassword")
-    db.session.add(admin)
-    db.session.commit()
-
-```
-
----
-
-## Deployment — recommended platforms & quick steps
-
-This app runs as a standard Flask app and can be deployed in many ways. For production use a managed Postgres database instead of SQLite.
-
-Recommended platforms (easy → advanced):
-
-- Render (easy): GitHub → Render Web Service, set build command `pip install -r requirements.txt` and start command `gunicorn app:app`.
-- Railway: GitHub → Railway project, add Postgres plugin, set start `gunicorn app:app`.
-- Fly.io: container-first (use `Dockerfile` and `flyctl deploy`).
-- Google Cloud Run / Azure Web App for Containers: build & push container, deploy to managed serverless container.
-
-Quick Git + Render workflow:
-
-```powershell
-cd "c:/Users/shais/Desktop/register & resources/college_event_system"
-git init
-git add .
-git commit -m "Initial commit"
-# create repo on GitHub and add remote
-git remote add origin https://github.com/<you>/<repo>.git
-git push -u origin main
-
-# On Render: New → Web Service → Connect Repo → Deploy
-```
-
-Docker (local test):
-
-```powershell
-docker build -t college-event-system .
-docker run -p 5000:5000 college-event-system
-```
-
-Environment variables to set on production:
-- `DATABASE_URL` — (Postgres) connection string
-- `FLASK_ENV` — `production`
-- Any secret keys / config in `config.py` or env
-
-If you want I can add a small `config.py` loader that prefers `DATABASE_URL` when present.
-
----
-
-## Troubleshooting
-
-- No events shown: run `python seed_data.py` or delete `app_data.db` and re-seed.
-- Admin login fails: re-run `python seed_data.py` to recreate admin or create one via Flask shell.
-- Port in use: change host/port when running or stop existing process.
-
-If you see template or routing errors, check `blueprints/events.py` for `url_for` endpoint names and `templates/` for matching names.
-
----
-
-## Project Status (summary)
-
-- Development-ready, demoable with seeded data (5 events, 10 resources).
-- Admin functionality and booking approval workflow implemented.
-- Suggested next steps before production: migrate to Postgres, add email notifications, add image upload, and secure admin endpoints.
-
----
-
-## Credit
-
-Crafted with 💙 by Shaista — consolidated README.
-
-- ✅ Events page displays all event cards with:
-  - Event image, title, date, location
-  - Short description
-  - "View More" button (navigates to /event/<id>)
-  - "Register" button (opens modal form)
-- ✅ Event detail page shows:
-  - Full event information
-  - Large description
-  - Registration modal popup
-  - AJAX form submission to `/register-event`
-- ✅ Database seeded with 5 sample events:
-  - Ripples 2024 (Non-Technical)
-  - Code Hackathon 2024 (Hackathons)
-  - Tech Expo 2024 (Workshops)
-  - Freshers Party 2024 (Non-Technical)
-  - DJ Night (Non-Technical)
+## ✨ Features
+
+### 1. **Event Registration System**
+- Browse all college events with search and filter options
+- View detailed event information (date, location, description, team size, fee)
+- AJAX-based registration modal for seamless registration
+- Support for multi-part events (e.g., Ripples has Technical & Non-Technical)
+- Responsive event cards with images and event metadata
 
 ### 2. **Resource Booking System**
-- ✅ Resources page displays all resource cards with:
-  - Resource image, name, category, quantity
-  - Smart "Best for" suggestions per resource type
-  - "Book" button (opens booking modal)
-- ✅ Booking modal form collects:
-  - Personal info (name, registration no, email, mobile)
-  - Academic info (branch, year)
-  - Booking details (start date, end date, event name, purpose)
-  - AJAX submission to `/book-resource`
-- ✅ Database seeded with 10 sample resources:
-  - Wireless Microphone System (Audio)
-  - Projector HD (AV)
-  - LED Lights Kit (Decoration)
-  - Main Hall (Hall)
-  - PA System (Audio)
-  - And 5 more...
+- Browse available campus resources (projectors, mics, lights, halls, etc.)
+- Advanced booking modal with date range selection
+- Automatic conflict detection to prevent double-booking
+- Smart resource suggestions based on event type
+- Support for 10+ different resource categories
 
-### 3. **Event-Specific Resource Suggestions**
-- ✅ Bottom of resources page displays 3 suggestion categories:
-  1. **🎯 For Ripples Events**: Wireless Mic, Projector, Decoration Lights, Main Hall
-  2. **💻 For Technical Events**: Laptops, Projector Screen, PA System, Power Strips
-  3. **🎭 For Cultural Events**: Sound System, Stage Lights, Decoration Items, Chairs & Tables
-- ✅ Each suggestion shown with emoji icons and labels
+### 3. **Admin Dashboard**
+- Session-based admin authentication
+- View all pending resource bookings and event registrations
+- Approve or reject resource booking requests
+- Manage resource availability and status
+- Real-time dashboard with pending actions count
 
-### 4. **Database & Models**
-- ✅ SQLite database (app_data.db) with tables:
-  - User (admin accounts)
-  - Event (event information)
-  - Resource (resource inventory)
-  - Registration (event registrations)
-  - Booking (resource bookings)
-- ✅ Relationships properly configured with backrefs
-- ✅ 5 events + 10 resources seeded successfully
-
-### 5. **Frontend UI/UX**
-- ✅ Glassmorphism dark theme with Bootstrap 5
-- ✅ AOS scroll animations on all pages
-- ✅ Modal popups for registration and booking
-- ✅ Responsive grid layout (mobile-friendly)
-- ✅ Filter/search bars on events and resources pages
-- ✅ Consistent neon blue (#60A5FA) accent color
-
-### 6. **Backend API Endpoints**
-- ✅ Events Blueprint:
-  - `GET /events` - List all events with filters
-  - `GET /event/<id>` - Event detail page
-  - `POST /register-event` - Register for event
-  - `GET /api/event/<id>` - Event JSON data
-- ✅ Resources Blueprint:
-  - `GET /resources` - List all resources with filters
-  - `POST /book-resource` - Book a resource
-  - `GET /api/resources/suggestions` - Get suggestions
-- ✅ Admin Blueprint:
-  - `GET /admin/login` - Admin login form
-  - `POST /admin/login` - Process login
-  - `GET /admin/dashboard` - View pending bookings
-  - `GET /admin/booking/<id>/approve` - Approve booking
-  - `GET /admin/booking/<id>/reject` - Reject booking
-
----
-
-## 🎯 User Journey
-
-### **Event Registration Flow**
-1. User visits `/events` page
-2. Browse all event cards OR filter by category/search
-3. Click "View More" → sees full event details at `/event/<id>`
-4. Click "Register" button → modal popup appears
-5. Fill registration form (name, registration no, email, etc.)
-6. Click "Submit" → AJAX POST to `/register-event`
-7. Success message → registration saved to database
-
-### **Resource Booking Flow**
-1. User visits `/resources` page
-2. Browse all resource cards OR filter by category
-3. See event-specific suggestions at bottom
-4. Click "Book" button on resource → modal popup appears
-5. Fill booking form (dates, event name, purpose, personal info)
-6. Click "Submit" → AJAX POST to `/book-resource`
-7. Success message → booking saved to database
-8. Admin can approve/reject at `/admin/dashboard`
+### 4. **Modern UI/UX**
+- Glassmorphism dark theme with neon blue accents
+- Bootstrap 5 responsive grid layout
+- AOS scroll animations for visual polish
+- Mobile-friendly interface
+- Smooth modal transitions and form interactions
 
 ---
 
@@ -331,132 +46,411 @@ Crafted with 💙 by Shaista — consolidated README.
 
 ```
 college_event_system/
-├── app.py                    # Main Flask app
-├── config.py                # Configuration
-├── models.py               # Database models
-├── seed_data.py            # Database seeding script
-├── requirements.txt        # Dependencies
+├── app.py                      # Flask app factory & entrypoint
+├── config.py                   # Configuration settings
+├── models.py                   # SQLAlchemy database models
+├── seed_data.py                # Database seeding script
+├── requirements.txt            # Python dependencies
+├── Dockerfile                  # Docker container config
+├── Procfile                    # Render deployment config
+├── .gitignore                  # Git ignore rules
 ├── blueprints/
-│   ├── events.py          # Events routes
-│   ├── resources.py       # Resources routes
-│   └── admin.py           # Admin routes
+│   ├── events.py              # Events routes & logic
+│   ├── resources.py           # Resources routes & logic
+│   └── admin.py               # Admin routes & dashboard
 ├── templates/
-│   ├── base.html          # Base template with navbar
-│   ├── home.html          # Landing page
-│   ├── events.html        # Events listing + registration modal
-│   ├── event_detail.html  # Single event detail + modal
-│   ├── resources.html     # Resources listing + booking modal + suggestions
-│   └── admin_*.html       # Admin templates
+│   ├── base.html              # Base template with navbar
+│   ├── home.html              # Landing page
+│   ├── events.html            # Events listing page
+│   ├── event_detail.html      # Single event detail page
+│   ├── resources.html         # Resources listing & suggestions
+│   ├── admin_login.html       # Admin login form
+│   └── admin_dashboard.html   # Admin dashboard
 ├── static/
-│   ├── css/custom.css     # Custom dark theme styling
-│   ├── js/custom.js       # JavaScript utilities
-│   └── img/               # Image placeholder directory
-└── app_data.db           # SQLite database (auto-created)
+│   ├── css/custom.css         # Custom dark theme styling
+│   ├── js/custom.js           # JavaScript utilities
+│   └── img/                   # Event & resource images
+└── app_data.db               # SQLite database (auto-created)
 ```
 
 ---
 
-## 🚀 How to Run
+## 📊 Demo Data
 
-1. **Start the Flask server:**
-   ```bash
-   cd "c:/Users/shais/Desktop/register & resources/college_event_system"
+### Events (5 Pre-seeded)
+- **Ripples 2024** - Main annual cultural event with Technical & Non-Technical sub-events
+- **Tech Expo 2024** - Technology exhibition and workshops
+- **Code Hackathon 2024** - 24-hour coding competition
+- **Freshers Party 2024** - Welcome event for first-year students
+- **DJ Night** - Evening music and dance event
+
+### Resources (10 Pre-seeded)
+- **Audio**: Wireless Microphone System, PA System, Sound System
+- **AV**: Projector (HD), Projector Screen
+- **Decoration**: LED Lights Kit, Stage Setup
+- **Hall**: Main Hall (1 available)
+- **Equipment**: Laptop Stand, Power Strips (8-outlet)
+
+### Admin Account (Pre-seeded)
+```
+Email: admin@college.com
+Password: admin123
+```
+
+---
+
+## 🚀 Quick Start (Local)
+
+### Prerequisites
+- Python 3.8+
+- pip package manager
+
+### Installation & Run (5 minutes)
+
+1. **Clone and navigate to project:**
+   ```powershell
+   cd "c:\Users\shais\Desktop\register & resources\college_event_system"
+   ```
+
+2. **(Optional) Create virtual environment:**
+   ```powershell
+   python -m venv venv
+   .\venv\Scripts\Activate.ps1
+   ```
+
+3. **Install dependencies:**
+   ```powershell
+   pip install -r requirements.txt
+   ```
+
+4. **Start the application:**
+   ```powershell
+   python app.py
+   ```
+   *or*
+   ```powershell
    python -m flask run
    ```
 
-2. **Access the application:**
+5. **Access in browser:**
    - Home: http://127.0.0.1:5000/
    - Events: http://127.0.0.1:5000/events
    - Resources: http://127.0.0.1:5000/resources
-   - Admin Login: http://127.0.0.1:5000/admin/login
+   - Admin: http://127.0.0.1:5000/admin/login
 
-3. **Database already seeded** with sample data (5 events + 10 resources)
-
----
-
-## 📝 Sample Data
-
-### Events (Seeded)
-- Ripples 2024 - Main cultural event
-- Code Hackathon 2024 - 24-hour coding competition
-- Tech Expo 2024 - Technology exhibition & workshops
-- Freshers Party 2024 - Welcome event
-- DJ Night - Evening music & dance
-
-### Resources (Seeded)
-- Audio: Wireless Mic, PA System, Sound System
-- AV: Projector, Projection Screen
-- Decoration: LED Lights, Stage Setup
-- Hall: Main Hall (1 available)
-- Equipment: Laptops, Power Strips
+**Note**: Database is auto-seeded on first run. No manual setup needed!
 
 ---
 
-## ✨ Key Features Implemented
+## 🗄️ Database Models
 
-| Feature | Status | Details |
-|---------|--------|---------|
-| Event Listing | ✅ | Display cards with filters |
-| Event Registration Modal | ✅ | Pop-up form with AJAX submit |
-| Resource Listing | ✅ | Display cards with filters |
-| Resource Booking Modal | ✅ | Pop-up form with AJAX submit |
-| Event Suggestions | ✅ | Show resources for each event type |
-| Database Seeding | ✅ | 5 events + 10 resources |
-| Admin Dashboard | ✅ | View & approve/reject bookings |
-| Responsive Design | ✅ | Mobile-friendly with Bootstrap 5 |
-| Dark Theme | ✅ | Glassmorphism with neon accents |
-| Scroll Animations | ✅ | AOS animations on all pages |
+### User
+- `id` (Primary Key)
+- `name`, `email` (unique)
+- `password_hash` (bcrypt hashed)
+- `is_admin` (boolean)
+- Relationships: registrations, bookings
 
----
+### Event
+- `id` (Primary Key)
+- `title`, `category`, `date`, `location`
+- `image`, `description_short`, `description_long`
+- `team_size`, `fee`
+- Relationships: registrations
 
-## 🔐 Admin Access
+### Resource
+- `id` (Primary Key)
+- `name`, `category`, `image`, `quantity`
+- Relationships: bookings
 
-The system uses session-based authentication (development mode only).
+### Registration
+- `id` (Primary Key)
+- `event_id` (Foreign Key), `user_id` (Foreign Key)
+- `name`, `registration_no`, `email`, `mobile`
+- `branch`, `year`, `created_at`
 
-- Admin credentials can be created via database
-- Admin dashboard at `/admin/login`
-- Approve/reject resource bookings
-- View all registrations
-
----
-
-## 🎨 Styling & Theme
-
-- **Color Scheme**: Dark glassmorphism (rgba backgrounds, backdrop-filter blur)
-- **Primary Accent**: Neon Blue (#60A5FA)
-- **Typography**: Modern sans-serif
-- **Animations**: AOS scroll effects (fade, zoom, slide)
-- **Responsive**: Mobile-first Bootstrap 5 grid
+### Booking
+- `id` (Primary Key)
+- `resource_id` (Foreign Key), `user_id` (Foreign Key)
+- `event_name`, `purpose`
+- `start_date`, `end_date`
+- `status` (pending/approved/rejected), `created_at`
 
 ---
 
-## 📊 Database Schema
+## 🔑 API Endpoints
 
-### Event Table
-- id (PK)
-- title, category, date, location
-- image, description_short, description_long
-- team_size, fee
+### Events Blueprint (`/events`)
+- `GET /events` - List all events (supports filtering)
+- `GET /event/<id>` - Event detail page
+- `GET /api/event/<id>` - Event data (JSON)
+- `POST /register-event` - Submit event registration
 
-### Resource Table
-- id (PK)
-- name, category
-- image, quantity
+### Resources Blueprint (`/resources`)
+- `GET /resources` - List all resources (supports filtering)
+- `GET /api/resources/suggestions` - Get resource suggestions
+- `POST /book-resource` - Submit resource booking
 
-### Registration Table
-- id (PK)
-- event_id (FK), user_id (FK)
-- name, regno, email, mobile, year
-- created_at
-
-### Booking Table
-- id (PK)
-- resource_id (FK), user_id (FK)
-- event_name, purpose
-- start_date, end_date, status
-- created_at
+### Admin Blueprint (`/admin`)
+- `GET /admin/login` - Admin login form
+- `POST /admin/login` - Process login (session-based)
+- `GET /admin/dashboard` - View pending bookings & registrations
+- `POST /api/approve-booking` - Approve booking
+- `POST /api/reject-booking` - Reject booking
 
 ---
 
-**Last Updated**: 27 Nov 2025
-**Status**: ✅ All features completed and tested
+## 👥 User Journeys
+
+### Event Registration Flow
+1. Visit `/events` page
+2. Browse event cards or use search/filter
+3. Click "View More" on event card
+4. See full event details at `/event/<id>`
+5. Click "Register" button
+6. Fill registration form in modal (name, email, branch, year, etc.)
+7. Click "Submit"
+8. Success message displayed
+
+### Resource Booking Flow
+1. Visit `/resources` page
+2. Browse resource cards or filter by category
+3. See suggested resources for different event types
+4. Click "Book" on desired resource
+5. Fill booking form (select dates, event name, purpose, personal info)
+6. System checks for date conflicts
+7. Click "Submit"
+8. Success message and admin notification sent
+9. Admin reviews and approves/rejects at `/admin/dashboard`
+
+---
+
+## 🛠️ Tech Stack
+
+- **Backend**: Flask 3.0.2, Flask-SQLAlchemy 3.1.1, Flask-Migrate 4.0.5
+- **Database**: SQLite (development), PostgreSQL (production-ready)
+- **Frontend**: Bootstrap 5, Jinja2 templates, Vanilla JavaScript, AJAX
+- **Styling**: Custom CSS (glassmorphism theme), AOS animations
+- **Deployment**: Docker, Gunicorn, GitHub Actions CI/CD
+- **Hosting**: Render.com (free tier)
+
+---
+
+## 🚢 Deployment
+
+### Deploy to Render (Recommended)
+
+1. **Push to GitHub:**
+   ```powershell
+   git add .
+   git commit -m "Initial commit"
+   git remote add origin https://github.com/<username>/<repo>.git
+   git push -u origin main
+   ```
+
+2. **On Render.com:**
+   - Click "New" → "Web Service"
+   - Connect your GitHub repository
+   - Build command: `pip install -r requirements.txt`
+   - Start command: `gunicorn app:app`
+   - Click "Create Web Service"
+
+3. **Database**: 
+   - SQLite works for demo (auto-seeded)
+   - For production, use Render's PostgreSQL add-on and set `DATABASE_URL` env var
+
+### Docker (Local Testing)
+```powershell
+docker build -t college-event-system .
+docker run -p 5000:5000 college-event-system
+```
+
+### Environment Variables
+- `FLASK_ENV`: `production` or `development`
+- `DATABASE_URL`: PostgreSQL connection string (optional)
+- `SECRET_KEY`: Flask session secret (auto-generated if not set)
+
+---
+
+## ⚙️ Configuration
+
+Edit `config.py` to customize:
+- Database location (`SQLALCHEMY_DATABASE_URI`)
+- Session timeout and secret key
+- Debug and testing modes
+
+---
+
+## 🔐 Admin Features
+
+### Create Additional Admin Users
+
+Via Python shell:
+```python
+from app import create_app
+from models import db, User
+
+app = create_app()
+with app.app_context():
+    admin = User(name="New Admin", email="admin2@college.com", is_admin=True)
+    admin.set_password("securepassword")
+    db.session.add(admin)
+    db.session.commit()
+```
+
+### Admin Dashboard Tasks
+- View all pending resource bookings
+- View all event registrations
+- Approve resource bookings (changes status to "approved")
+- Reject resource bookings (changes status to "rejected")
+- Track booking dates and user information
+
+---
+
+## 🎯 Editing Event & Resource Data
+
+### Option 1: Edit Seed File
+- File: `seed_data.py`
+- Modify the event/resource lists in the `events = [...]` and `resources = [...]` sections
+- Delete `app_data.db` and re-run `python seed_data.py`
+
+### Option 2: Use Flask Shell (Recommended for Single Changes)
+```powershell
+python
+>>> from app import create_app
+>>> app = create_app()
+>>> from models import db, Event
+>>> ctx = app.app_context(); ctx.push()
+>>> event = Event.query.filter_by(title="Ripples 2024").first()
+>>> event.location = "New Venue"
+>>> event.fee = 500
+>>> db.session.commit()
+>>> ctx.pop()
+```
+
+---
+
+## 🧪 Testing & Troubleshooting
+
+### Issue: No events or resources shown
+**Solution**: Database auto-seeds on startup. If missing data:
+```powershell
+python seed_data.py
+```
+
+### Issue: Admin login fails
+**Solution**: Re-seed the database:
+```powershell
+python seed_data.py
+```
+Or create admin via Flask shell (see "Creating Additional Admins" above)
+
+### Issue: Port 5000 already in use
+**Solution**: Change port when running:
+```powershell
+python -m flask run --port 5001
+```
+
+### Issue: Static images not loading
+**Solution**: Ensure images exist in `static/img/` folder with exact names referenced in seed data.
+
+---
+
+## 📚 Stack Overflow & References
+
+- Flask Documentation: https://flask.palletsprojects.com/
+- SQLAlchemy ORM: https://docs.sqlalchemy.org/
+- Bootstrap 5: https://getbootstrap.com/docs/5.0/
+- AOS Animations: https://michalsnik.github.io/aos/
+- Render Deployment: https://render.com/docs
+
+---
+
+## 📋 Requirements
+
+See `requirements.txt`:
+- Flask==3.0.2
+- Flask-SQLAlchemy==3.1.1
+- Flask-Migrate==4.0.5
+- gunicorn==21.2.0
+- python-dotenv==1.0.0
+- Jinja2==3.1.2
+- Werkzeug==3.0.1
+- Flask-Login==0.6.3
+- blinker==1.7.0
+
+---
+
+## 🎨 Design Highlights
+
+- **Dark Glassmorphism Theme**: Semi-transparent frosted glass effect with backdrop blur
+- **Neon Blue Accents**: #60A5FA primary color for CTAs and highlights
+- **Smooth Animations**: AOS scroll animations (fade, zoom, slide) on all pages
+- **Responsive Design**: Mobile-first Bootstrap 5 grid (works on phones, tablets, desktops)
+- **Modal Forms**: Smooth AJAX-based registration and booking modals
+
+---
+
+## 📝 Customization Tips
+
+1. **Change Colors**: Edit `static/css/custom.css` - look for `#60A5FA` (neon blue)
+2. **Add Events**: Modify `seed_data.py` and re-seed
+3. **Upload Images**: Place images in `static/img/` and reference in seed data
+4. **Change Navbar**: Edit `templates/base.html`
+5. **Modify Database Fields**: Edit `models.py` and run `flask db migrate`
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is open source and available under the MIT License.
+
+---
+
+## 👤 Author
+
+**Shaista** - College Event & Resource Booking System
+
+- 🔗 GitHub: [Shaie1383](https://github.com/Shaie1383)
+- 🌐 Live Demo: [event-hub-kqqy.onrender.com](https://event-hub-kqqy.onrender.com)
+
+---
+
+## ✅ Status & Next Steps
+
+**Completed**:
+- ✅ Full event management system with registration
+- ✅ Resource booking with conflict detection
+- ✅ Admin dashboard with approval workflow
+- ✅ Responsive dark theme UI
+- ✅ Database auto-initialization
+- ✅ GitHub Actions CI/CD pipeline
+- ✅ Live deployment on Render
+
+**Suggested Future Enhancements**:
+- 📧 Email notifications for booking approvals
+- 📸 Image upload feature for admins
+- 📱 Mobile app (React Native)
+- 🔔 Real-time notifications (WebSocket)
+- 💳 Payment integration for event fees
+- 📊 Admin analytics dashboard
+- 🔍 Advanced search with filters
+- 🗓️ Calendar view for events
+
+---
+
+**Last Updated**: December 2024  
+**Status**: Production-Ready ✅
+
+For questions or issues, please open a GitHub issue or contact the author.
