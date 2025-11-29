@@ -145,64 +145,62 @@ app = create_app()
 # Controlled by the `AUTO_INIT_DB` environment variable to avoid running
 # in production unintentionally. Set `AUTO_INIT_DB=true` on the host
 # (for example in Render's env vars) to enable this behavior.
-if os.environ.get("AUTO_INIT_DB", "").lower() in ("1", "true", "yes"):
-    try:
-        with app.app_context():
-            try:
-                from models import db, User, Event, Resource
-            except Exception as _e:
-                app.logger.warning("AUTO_INIT_DB: models import failed: %s", _e)
-            else:
-                # Create tables
-                db.create_all()
-                # Seed admin user if missing
-                if not User.query.filter_by(email="admin@example.com").first():
-                    admin = User(name="Admin", email="admin@example.com", is_admin=True)
-                    try:
-                        admin.set_password("adminpass")
-                    except Exception:
-                        # Some User implementations may differ; ignore password set failure for showcase
-                        pass
-                    db.session.add(admin)
-                # Seed demo events if missing
-                if Event.query.count() == 0:
-                    from datetime import date
-                    demo = [
-                        Event(title="Ripples 2024", category="Ripples", date=date(2024,12,30),
-                              location="Main Auditorium", image="ripples.jpg", description_short="Technical workshops and competitions.",
-                              description_long="Ripples long description...", team_size="Varies", fee="Free"),
-                        Event(title="Expo 2024", category="Expo", date=date(2024,12,27),
-                              location="Exhibition Hall D", image="expo.jpg", description_short="Showcasing innovative projects.",
-                              description_long="Expo long description...", team_size="3-5 Members", fee="$500 per Team"),
-                        Event(title="Hackathon 2024", category="Hackathons", date=date(2024,12,28),
-                              location="Coding Lab", image="hack.jpg", description_short="24-hour coding contest.",
-                              description_long="Hackathon long details...", team_size="5-8 Members", fee="500 per Team"),
-                        Event(title="DJ Night 2024", category="Social", date=date(2024,12,31),
-                              location="Amphitheater", image="dj.jpg", description_short="High-energy dance night with live DJ.",
-                              description_long="Ring in the New Year with top DJs, dancing, and entertainment.", team_size="Unlimited", fee="$15 per Person"),
-                        Event(title="Freshers Party", category="Social", date=date(2024,12,29),
-                              location="Open Ground", image="party.jpg", description_short="Welcome celebration for new students.",
-                              description_long="Fun-filled evening with games, music, food, and networking.", team_size="Unlimited", fee="Free")
-                    ]
-                    db.session.bulk_save_objects(demo)
-                # Seed demo resources if missing
-                if Resource.query.count() == 0:
-                    demo_res = [
-                        Resource(name="Projector", category="AV", image="projector.jpg", quantity=3),
-                        Resource(name="Wireless Mic", category="Audio", image="mic.jpg", quantity=10),
-                        Resource(name="Decoration Lights", category="Decoration", image="lights.jpg", quantity=20)
-                    ]
-                    db.session.bulk_save_objects(demo_res)
-                # Commit any new rows
+# Always auto-initialize on startup
+try:
+    with app.app_context():
+        try:
+            from models import db, User, Event, Resource
+        except Exception as _e:
+            app.logger.warning("Auto-init: models import failed: %s", _e)
+        else:
+            # Create tables
+            db.create_all()
+            # Seed admin user if missing
+            if not User.query.filter_by(email="admin@example.com").first():
+                admin = User(name="Admin", email="admin@example.com", is_admin=True)
                 try:
-                    db.session.commit()
-                except Exception as _e:
-                    app.logger.exception("AUTO_INIT_DB commit failed: %s", _e)
-                else:
-                    app.logger.info("AUTO_INIT_DB: tables created and demo data seeded (if missing)")
-    except Exception as e:
-        # Catch everything to avoid crashing WSGI import
-        app.logger.exception("AUTO_INIT_DB: unexpected error during auto-init: %s", e)
+                    admin.set_password("adminpass")
+                except Exception:
+                    pass
+                db.session.add(admin)
+            # Seed demo events if missing
+            if Event.query.count() == 0:
+                from datetime import date
+                demo = [
+                    Event(title="Ripples 2024", category="Ripples", date=date(2024,12,30),
+                          location="Main Auditorium", image="ripples.jpg", description_short="Technical workshops and competitions.",
+                          description_long="Ripples long description...", team_size="Varies", fee="Free"),
+                    Event(title="Expo 2024", category="Expo", date=date(2024,12,27),
+                          location="Exhibition Hall D", image="expo.jpg", description_short="Showcasing innovative projects.",
+                          description_long="Expo long description...", team_size="3-5 Members", fee="$500 per Team"),
+                    Event(title="Hackathon 2024", category="Hackathons", date=date(2024,12,28),
+                          location="Coding Lab", image="hack.jpg", description_short="24-hour coding contest.",
+                          description_long="Hackathon long details...", team_size="5-8 Members", fee="500 per Team"),
+                    Event(title="DJ Night 2024", category="Social", date=date(2024,12,31),
+                          location="Amphitheater", image="dj.jpg", description_short="High-energy dance night with live DJ.",
+                          description_long="Ring in the New Year with top DJs, dancing, and entertainment.", team_size="Unlimited", fee="$15 per Person"),
+                    Event(title="Freshers Party", category="Social", date=date(2024,12,29),
+                          location="Open Ground", image="party.jpg", description_short="Welcome celebration for new students.",
+                          description_long="Fun-filled evening with games, music, food, and networking.", team_size="Unlimited", fee="Free")
+                ]
+                db.session.bulk_save_objects(demo)
+            # Seed demo resources if missing
+            if Resource.query.count() == 0:
+                demo_res = [
+                    Resource(name="Projector", category="AV", image="projector.jpg", quantity=3),
+                    Resource(name="Wireless Mic", category="Audio", image="mic.jpg", quantity=10),
+                    Resource(name="Decoration Lights", category="Decoration", image="lights.jpg", quantity=20)
+                ]
+                db.session.bulk_save_objects(demo_res)
+            # Commit any new rows
+            try:
+                db.session.commit()
+            except Exception as _e:
+                app.logger.exception("Auto-init commit failed: %s", _e)
+            else:
+                app.logger.info("✔ Database auto-initialized: tables created and demo data seeded")
+except Exception as e:
+    app.logger.exception("⚠ Database auto-init warning: %s", e)
 
 
 if __name__ == "__main__":
