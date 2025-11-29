@@ -109,12 +109,12 @@ def create_app(config_object=None):
                 Event(title="Hackathon 2024", category="Hackathons", date=date(2024,12,28),
                       location="Coding Lab", image="hack.jpg", description_short="24-hour coding contest.",
                       description_long="Hackathon long details...", team_size="5-8 Members", fee="500 per Team"),
-                Event(title="DJ Night 2024", category="Social", date=date(2024,12,31),
-                      location="Amphitheater", image="dj.jpg", description_short="High-energy dance night with live DJ.",
-                      description_long="Ring in the New Year with top DJs, dancing, and entertainment.", team_size="Unlimited", fee="$15 per Person"),
-                Event(title="Freshers Party", category="Social", date=date(2024,12,29),
-                      location="Open Ground", image="party.jpg", description_short="Welcome celebration for new students.",
-                      description_long="Fun-filled evening with games, music, food, and networking.", team_size="Unlimited", fee="Free")
+                    Event(title="DJ Night 2024", category="Social", date=date(2024,12,31),
+                        location="Amphitheater", image="djnight.jpg", description_short="High-energy dance night with live DJ.",
+                        description_long="Ring in the New Year with top DJs, dancing, and entertainment.", team_size="Unlimited", fee="$15 per Person"),
+                    Event(title="Freshers Party", category="Social", date=date(2024,12,29),
+                        location="Open Ground", image="freshers.jpg", description_short="Welcome celebration for new students.",
+                        description_long="Fun-filled evening with games, music, food, and networking.", team_size="Unlimited", fee="Free")
             ]
             db.session.bulk_save_objects(demo)
             click.echo("Seeded sample events.")
@@ -176,11 +176,11 @@ try:
                     Event(title="Hackathon 2024", category="Hackathons", date=date(2024,12,28),
                           location="Coding Lab", image="hack.jpg", description_short="24-hour coding contest.",
                           description_long="Hackathon long details...", team_size="5-8 Members", fee="500 per Team"),
-                    Event(title="DJ Night 2024", category="Social", date=date(2024,12,31),
-                          location="Amphitheater", image="dj.jpg", description_short="High-energy dance night with live DJ.",
+                      Event(title="DJ Night 2024", category="Social", date=date(2024,12,31),
+                          location="Amphitheater", image="djnight.jpg", description_short="High-energy dance night with live DJ.",
                           description_long="Ring in the New Year with top DJs, dancing, and entertainment.", team_size="Unlimited", fee="$15 per Person"),
-                    Event(title="Freshers Party", category="Social", date=date(2024,12,29),
-                          location="Open Ground", image="party.jpg", description_short="Welcome celebration for new students.",
+                      Event(title="Freshers Party", category="Social", date=date(2024,12,29),
+                          location="Open Ground", image="freshers.jpg", description_short="Welcome celebration for new students.",
                           description_long="Fun-filled evening with games, music, food, and networking.", team_size="Unlimited", fee="Free")
                 ]
                 db.session.bulk_save_objects(demo)
