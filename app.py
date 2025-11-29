@@ -3,13 +3,10 @@
 Main entrypoint for the College Event Registration + Resource Allocation System
 Multi-file Flask project root. This file creates the Flask app, registers blueprints,
 sets up extensions, and provides CLI helpers to initialize & seed the database.
-
-Create the other files next (models.py, templates, static, blueprints, etc).
 """
 
 import os
-from pathlib import Path
-from flask import Flask, redirect, url_for, current_app
+from flask import Flask
 from flask_migrate import Migrate
 from flask.cli import with_appcontext
 import click
@@ -20,130 +17,254 @@ try:
 except Exception:
     class Config:
         SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
-        SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///app_data.db")
+        SQLALCHEMY_DATABASE_URI = os.environ.get(
+            "DATABASE_URL", "sqlite:///app_data.db"
+        )
         SQLALCHEMY_TRACK_MODIFICATIONS = False
-        # Customize these if you want
-        UPLOADED_IMAGES_ZIP = os.environ.get("UPLOADED_IMAGES_ZIP", "")
 
-# The models module will be created next. We import inside create_app to avoid import-time issues
+
 def create_app(config_object=None):
     """
-    Create and configure the Flask application.
-    This function registers blueprints if they exist and initializes extensions.
+    Main Flask application factory.
     """
     app = Flask(__name__, static_folder="static", template_folder="templates")
     app.config.from_object(config_object or Config)
 
-    # Initialize extensions that depend on models.py
+    # Try importing models
     try:
-        # Import SQLAlchemy instance and models from models.py (to be created)
         from models import db, User, Event, Resource, Booking, Registration
     except Exception as e:
-        # If models.py doesn't exist yet, create a minimal placeholder db to avoid crash.
-        # Real models will be available once models.py is created and the app restarted.
         db = None
         User = Event = Resource = Booking = Registration = None
-        app.logger.warning("models.py not found or failed to import. Create models.py next. (%s)", e)
+        app.logger.warning(f"models.py not found or broken: {e}")
 
-    # Only initialize db & migrate if models imported successfully
+    # Initialize DB + Migrations
     if db is not None:
         db.init_app(app)
         migrate = Migrate(app, db)
     else:
         migrate = None
 
-    # Register blueprints (if present). Blueprints files will be created later.
+    # Register blueprints
     try:
         from blueprints.events import events_bp
-        app.register_blueprint(events_bp)
-        
         from blueprints.resources import resources_bp
-        app.register_blueprint(resources_bp)
-        
         from blueprints.admin import admin_bp
+
+        app.register_blueprint(events_bp)
+        app.register_blueprint(resources_bp)
         app.register_blueprint(admin_bp)
+
     except Exception as e:
         print(f"Blueprint registration warning: {e}")
-    # Simple home route
+
+    # Home route
     @app.route("/")
     def index():
         from flask import render_template
         return render_template("home.html")
 
-    # Add CLI helpers for initializing and seeding the DB
+    # CLI Commands -------------------------------------------------------------
     @click.command("init-db")
     @with_appcontext
     def init_db_command():
-        """Initialize the database (create tables)."""
+        """Initialize database."""
         if db is None:
-            click.echo("models.py (and db) not available. Create models.py first.")
+            click.echo("models.py missing.")
             return
         db.create_all()
-        click.echo("Initialized the database.")
+        click.echo("Database initialized.")
 
     @click.command("seed-db")
     @with_appcontext
     def seed_db_command():
-        """Seed database with demo events/resources/admin user."""
+        """Seed sample data."""
         if db is None:
-            click.echo("models.py (and db) not available. Create models.py first.")
+            click.echo("models.py missing.")
             return
-        # Import models inside function to ensure models exist
+
         from models import User, Event, Resource
-        # Create admin if none
+        from datetime import date
+
+        # Admin
         if not User.query.filter_by(email="admin@example.com").first():
             admin = User(name="Admin", email="admin@example.com", is_admin=True)
             admin.set_password("adminpass")
             db.session.add(admin)
-            click.echo("Created admin: admin@example.com / adminpass")
-        # Add sample events if none
+
+        # Events
         if Event.query.count() == 0:
-            from datetime import date
             demo = [
-                Event(title="Ripples 2024", category="Ripples", date=date(2024,12,30),
-                      location="Main Auditorium", image="ripples.jpg", description_short="Technical workshops and competitions.",
-                      description_long="Ripples long description...", team_size="Varies", fee="Free"),
-                Event(title="Expo 2024", category="Expo", date=date(2024,12,27),
-                      location="Exhibition Hall D", image="expo.jpg", description_short="Showcasing innovative projects.",
-                      description_long="Expo long description...", team_size="3-5 Members", fee="$500 per Team"),
-                Event(title="Hackathon 2024", category="Hackathons", date=date(2024,12,28),
-                      location="Coding Lab", image="hack.jpg", description_short="24-hour coding contest.",
-                      description_long="Hackathon long details...", team_size="5-8 Members", fee="500 per Team")
+                Event(
+                    title="Ripples 2024",
+                    category="Ripples",
+                    date=date(2024, 12, 30),
+                    location="Main Auditorium",
+                    image="ripples.jpg",
+                    description_short="Technical workshops and competitions.",
+                    description_long="Ripples long description...",
+                    team_size="Varies",
+                    fee="Free",
+                ),
+                Event(
+                    title="Expo 2024",
+                    category="Expo",
+                    date=date(2024, 12, 27),
+                    location="Exhibition Hall D",
+                    image="expo.jpg",
+                    description_short="Showcasing innovative projects.",
+                    description_long="Expo long description...",
+                    team_size="3-5 Members",
+                    fee="$500 per Team",
+                ),
+                Event(
+                    title="Hackathon 2024",
+                    category="Hackathons",
+                    date=date(2024, 12, 28),
+                    location="Coding Lab",
+                    image="hack.jpg",
+                    description_short="24-hour coding contest.",
+                    description_long="Hackathon long details...",
+                    team_size="5-8 Members",
+                    fee="500 per Team",
+                ),
             ]
             db.session.bulk_save_objects(demo)
-            click.echo("Seeded sample events.")
-        # Add some resources
+
+        # Resources
         if Resource.query.count() == 0:
             demo_res = [
-                Resource(name="Projector", category="AV", image="projector.jpg", quantity=3),
-                Resource(name="Wireless Mic", category="Audio", image="mic.jpg", quantity=10),
-                Resource(name="Decoration Lights", category="Decoration", image="lights.jpg", quantity=20)
+                Resource(
+                    name="Projector",
+                    category="AV",
+                    image="projector.jpg",
+                    quantity=3,
+                ),
+                Resource(
+                    name="Wireless Mic",
+                    category="Audio",
+                    image="mic.jpg",
+                    quantity=10,
+                ),
+                Resource(
+                    name="Decoration Lights",
+                    category="Decoration",
+                    image="lights.jpg",
+                    quantity=20,
+                ),
             ]
             db.session.bulk_save_objects(demo_res)
-            click.echo("Seeded sample resources.")
+
         db.session.commit()
         click.echo("Seeding complete.")
 
-    # Register CLI commands on app
+    # Register CLI Commands
     app.cli.add_command(init_db_command)
     app.cli.add_command(seed_db_command)
+
+    # -------------------------------------------------------------------------
+    # AUTO INITIALIZE & SEED DATABASE ON RENDER
+    # -------------------------------------------------------------------------
+    if db is not None:
+        with app.app_context():
+            try:
+                from models import db, Event, Resource, User
+                from datetime import date
+
+                db.create_all()  # Creates table if missing
+
+                # -------- Seed Events --------
+                if Event.query.count() == 0:
+                    demo = [
+                        Event(
+                            title="Ripples 2024",
+                            category="Ripples",
+                            date=date(2024, 12, 30),
+                            location="Main Auditorium",
+                            image="ripples.jpg",
+                            description_short="Technical workshops and competitions.",
+                            description_long="Ripples long description...",
+                            team_size="Varies",
+                            fee="Free",
+                        ),
+                        Event(
+                            title="Expo 2024",
+                            category="Expo",
+                            date=date(2024, 12, 27),
+                            location="Exhibition Hall D",
+                            image="expo.jpg",
+                            description_short="Showcasing innovative projects.",
+                            description_long="Expo long description...",
+                            team_size="3-5 Members",
+                            fee="$500 per Team",
+                        ),
+                        Event(
+                            title="Hackathon 2024",
+                            category="Hackathons",
+                            date=date(2024, 12, 28),
+                            location="Coding Lab",
+                            image="hack.jpg",
+                            description_short="24-hour coding contest.",
+                            description_long="Hackathon long details...",
+                            team_size="5-8 Members",
+                            fee="500 per Team",
+                        ),
+                    ]
+                    db.session.bulk_save_objects(demo)
+
+                # -------- Seed Resources --------
+                if Resource.query.count() == 0:
+                    demo_res = [
+                        Resource(
+                            name="Projector",
+                            category="AV",
+                            image="projector.jpg",
+                            quantity=3,
+                        ),
+                        Resource(
+                            name="Wireless Mic",
+                            category="Audio",
+                            image="mic.jpg",
+                            quantity=10,
+                        ),
+                        Resource(
+                            name="Decoration Lights",
+                            category="Decoration",
+                            image="lights.jpg",
+                            quantity=20,
+                        ),
+                    ]
+                    db.session.bulk_save_objects(demo_res)
+
+                # -------- Seed Admin --------
+                if not User.query.filter_by(email="admin@example.com").first():
+                    admin = User(
+                        name="Admin",
+                        email="admin@example.com",
+                        is_admin=True,
+                    )
+                    admin.set_password("adminpass")
+                    db.session.add(admin)
+
+                db.session.commit()
+                print("✔ Auto database setup completed")
+
+            except Exception as e:
+                print("⚠ Auto DB setup error:", e)
 
     return app
 
 
-# Allow running this file directly for quick development
-# Create a top-level `app` so WSGI servers (gunicorn) can import it as `app:app`.
+# ------------------------------------------------------------------------------
+# Expose app for gunicorn
+# ------------------------------------------------------------------------------
 app = create_app()
 
-
 if __name__ == "__main__":
-    # If the models exist, you can create tables automatically on first run:
-    try:
-        with app.app_context():
-            # Only attempt to auto-create tables if models are importable
-            from models import db  # noqa
+    with app.app_context():
+        try:
+            from models import db
             db.create_all()
-    except Exception:
-        app.logger.warning("Skipped automatic db.create_all() because models.py is missing or raised an error.")
-    # Run the dev server
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+        except:
+            print("Local DB init skipped.")
+    app.run(debug=True)
