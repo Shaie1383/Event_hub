@@ -1,0 +1,164 @@
+<!-- /templates/modals/register_modal.html -->
+
+<style>
+/* Backdrop Blur */
+.modal-backdrop.show {
+    backdrop-filter: blur(8px);
+}
+
+/* Modal Glass Effect */
+.modal-content {
+    background: rgba(10, 15, 30, 0.85);
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    padding: 4px;
+}
+
+/* Modal Title */
+.modal-title {
+    color: var(--neon);
+    font-weight: 700;
+}
+
+/* Input Style */
+.modal-input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text);
+    outline: none;
+    margin-bottom: 12px;
+}
+.modal-input::placeholder {
+    color: var(--muted);
+}
+
+/* Submit Button */
+.modal-submit-btn {
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(90deg, var(--grad-a), var(--grad-b));
+    border: none;
+    border-radius: 12px;
+    color: #031127;
+    font-weight: 700;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    transition: transform 0.2s ease;
+}
+.modal-submit-btn:hover {
+    transform: translateY(-3px);
+}
+</style>
+
+
+<!-- ===================== -->
+<!-- REGISTRATION MODAL -->
+<!-- ===================== -->
+
+<div class="modal fade" id="registerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <form id="registerForm">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Register</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- Hidden event ID -->
+                    <input type="hidden" id="modal_event_id" name="event_id">
+
+                    <input type="text" class="modal-input" name="name" placeholder="Your Name" required>
+                    <input type="text" class="modal-input" name="regno" placeholder="Registration Number" required>
+                    <input type="email" class="modal-input" name="email" placeholder="Email Address" required>
+                    <input type="text" class="modal-input" name="mobile" placeholder="Mobile Number">
+
+                    <select class="modal-input" name="year" required>
+                        <option value="">Select Year</option>
+                        <option>1st</option>
+                        <option>2nd</option>
+                        <option>3rd</option>
+                        <option>4th</option>
+                    </select>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="modal-submit-btn">Submit Registration</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+// ==========================
+// Modal Open -> fill event ID
+// ==========================
+document.addEventListener("DOMContentLoaded", () => {
+
+    // From event cards (home & events list)
+    document.querySelectorAll(".open-register").forEach(btn => {
+        btn.addEventListener("click", function () {
+            const eventId = this.dataset.id;
+            const title = this.dataset.title;
+
+            document.getElementById("modal_event_id").value = eventId;
+            document.querySelector("#registerModal .modal-title").innerText = "Register for " + title;
+
+            new bootstrap.Modal(document.getElementById("registerModal")).show();
+        });
+    });
+
+    // From event detail page
+    const detailBtn = document.getElementById("openRegister");
+    if (detailBtn) {
+        detailBtn.addEventListener("click", () => {
+            const eventId = detailBtn.dataset.id;
+            const eventTitle = detailBtn.dataset.title;
+
+            document.getElementById("modal_event_id").value = eventId;
+            document.querySelector("#registerModal .modal-title").innerText = "Register for " + eventTitle;
+
+            new bootstrap.Modal(document.getElementById("registerModal")).show();
+        });
+    }
+
+    // ==========================
+    // AJAX submit
+    // ==========================
+    const form = document.getElementById("registerForm");
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        const response = await fetch("/register-event", {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert("✔ " + result.message);
+
+            // Close modal
+            bootstrap.Modal.getInstance(registerModal).hide();
+            form.reset();
+        } else {
+            alert("❌ " + (result.error || "Registration failed."));
+        }
+    });
+});
+</script>

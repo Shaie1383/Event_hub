@@ -1,0 +1,25 @@
+Flask
+Flask-SQLAlchemy
+gunicorn
+python-dotenv
+Jinja2
+Werkzeug
+Flask==3.0.2
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.5
+Flask-Login==0.6.3
+SQLAlchemy==2.0.25
+Werkzeug==3.0.1
+python-dotenv==1.0.1
+
+# For optional email notifications
+blinker==1.7.0
+
+# For CSV export and utilities
+pandas==2.2.0
+
+# For image extraction support (zip handling)
+Pillow==10.2.0
+
+# For production deployment (optional)
+gunicorn==21.2.0

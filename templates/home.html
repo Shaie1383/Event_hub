@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Home - College Event Portal{% endblock %}
+{% block content %}
+
+<style>
+.home-split {
+    display: flex;
+    height: 60vh;
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.home-box {
+    flex: 1;
+    border-radius: 22px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.35s ease;
+}
+
+.home-box:hover {
+    transform: translateY(-7px) scale(1.02);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+}
+
+.home-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #60A5FA;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .home-split {
+        flex-direction: column;
+        height: auto;
+    }
+}
+</style>
+
+<div class="home-split">
+    <!-- LEFT BOX — EVENTS -->
+    <div class="home-box" onclick="window.location.href='/events'" data-aos="fade-right">
+        <h1 class="home-title">Register for Events</h1>
+        <button class="btn btn-gradient" style="font-size:1.1rem;">
+            Explore Events →
+        </button>
+    </div>
+
+    <!-- RIGHT BOX — RESOURCES -->
+    <div class="home-box" onclick="window.location.href='/resources'" data-aos="fade-left">
+        <h1 class="home-title">Book Resources</h1>
+        <button class="btn btn-gradient" style="font-size:1.1rem;">
+            Book Now →
+        </button>
+    </div>
+</div>
+
+{% endblock %}

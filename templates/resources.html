@@ -1,0 +1,435 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* PAGE HERO */
+.resource-header {
+    background: linear-gradient(125deg, rgba(96,165,250,0.15), rgba(6,182,212,0.08));
+    padding: 22px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.05);
+    margin-bottom: 25px;
+}
+
+/* SEARCH FILTER BAR */
+.filter-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.filter-input, .filter-select {
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    color: var(--text);
+    flex: 1;
+    min-width: 180px;
+}
+
+/* CARD */
+.resource-card {
+    padding: 14px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: 0.25s;
+}
+.resource-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.4);
+}
+
+.resource-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+/* SUGGESTIONS BOX */
+.suggestion-box {
+    margin-top: 8px;
+    padding: 10px;
+    border-left: 3px solid #60A5FA;
+    background: rgba(255,255,255,0.04);
+    border-radius: 10px;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+/* BUTTON */
+.book-btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 700;
+    margin-top: 10px;
+    background: linear-gradient(135deg, #3b82f6, #06b6d4);
+    color: #02101d;
+    transition: .25s;
+}
+.book-btn:hover {
+    transform: scale(1.05);
+}
+
+/* MODAL OVERLAY */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(6px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 5000;
+}
+
+/* POPUP FORM */
+.booking-modal {
+    width: 92%;
+    max-width: 480px;
+    background: rgba(15,23,42,0.92);
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.16);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+    animation: pop .25s ease;
+}
+
+@keyframes pop {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.close-modal {
+    float: right;
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: white;
+    cursor: pointer;
+}
+
+.modal-input {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+    color: white;
+}
+
+.modal-submit {
+    width: 100%;
+    margin-top: 18px;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    color: #02101d;
+    background: linear-gradient(135deg, #3b82f6, #06b6d4);
+    transition: .25s ease;
+}
+.modal-submit:hover {
+    transform: scale(1.04);
+}
+
+/* CREDIT */
+.credit {
+    margin-top: 22px;
+    text-align: center;
+    color: var(--muted);
+}
+
+/* EVENT SUGGESTIONS SECTION */
+.suggestion-category {
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 20px;
+}
+
+.suggestion-item {
+    text-align: center;
+}
+
+.suggestion-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+</style>
+
+
+<!-- PAGE TITLE -->
+<div class="resource-header glass" data-aos="fade-down">
+    <h2 style="color:var(--neon); margin:0;">Resources</h2>
+    <p class="small-muted" style="margin-top:6px;">Search, filter & book college resources</p>
+</div>
+
+<!-- FILTER BAR -->
+<form method="get">
+    <div class="filter-box">
+
+        <input type="text" name="search" class="filter-input"
+               placeholder="Search resources..." value="{{ search }}">
+
+        <select name="category" class="filter-select">
+            <option value="">All Categories</option>
+            <option value="Audio" {% if category=='Audio' %}selected{% endif %}>Audio</option>
+            <option value="AV" {% if category=='AV' %}selected{% endif %}>AV</option>
+            <option value="Decoration" {% if category=='Decoration' %}selected{% endif %}>Decoration</option>
+            <option value="Hall" {% if category=='Hall' %}selected{% endif %}>Hall / Gallery</option>
+        </select>
+
+        <select name="sort" class="filter-select">
+            <option value="az" {% if sort=='az' %}selected{% endif %}>A → Z</option>
+            <option value="za" {% if sort=='za' %}selected{% endif %}>Z → A</option>
+        </select>
+
+        <button class="btn btn-gradient">Apply</button>
+    </div>
+</form>
+
+<!-- RESOURCE GRID -->
+<div class="row g-4">
+    {% for r in resources %}
+    <div class="col-md-4" data-aos="fade-up">
+        <div class="resource-card">
+
+            <img src="{{ url_for('static', filename='img/' ~ (r.image or 'placeholder.jpg')) }}"
+                 class="resource-img">
+
+            <h4 style="margin-top:12px; color:var(--neon);">{{ r.name }}</h4>
+
+            <p class="small-muted">
+                Category: <strong>{{ r.category }}</strong> <br>
+                Available: <strong>{{ r.quantity }}</strong>
+            </p>
+
+            <!-- SMART SUGGESTIONS -->
+            <div class="suggestion-box">
+                {% if r.category == "Audio" %}
+                Best for: Ripples, DJ Night, Freshers Party
+                {% elif r.category == "AV" %}
+                Best for: Expo, Presentations, Workshops
+                {% elif r.category == "Decoration" %}
+                Best for: Farewell, Freshers, Cultural Events
+                {% elif r.category == "Hall" %}
+                Best for: Hackathon, Seminars, Ripples Events
+                {% elif r.category == "Equipment" %}
+                Best for: Technical Events, Workshops
+                {% else %}
+                Great for campus events.
+                {% endif %}
+            </div>
+
+           <button class="book-btn" 
+        data-id="{{ r.id }}" 
+        data-name="{{ r.name|escape }}" 
+        onclick="openBooking(this.dataset.id, this.dataset.name)">
+    Book
+</button>
+
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center">
+        <p class="small-muted">No resources found. Try different filters.</p>
+    </div>
+    {% endfor %}
+</div>
+
+
+<!-- RESOURCE SUGGESTIONS SECTION -->
+<div class="row mt-5 mb-5" data-aos="fade-up">
+    <div class="col-12">
+        <h3 class="text-center mb-4" style="color: var(--neon);">📋 Event-Specific Resource Suggestions</h3>
+        
+        <!-- Ripples Event Suggestions -->
+        <div class="suggestion-category glass p-4 mb-4">
+            <h5 style="color: #60A5FA;">🎯 For Ripples Events</h5>
+            <div class="row mt-3">
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="suggestion-item">
+                        <div class="suggestion-icon">🎤</div>
+                        <small>Wireless Mic</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="suggestion-item">
+                        <div class="suggestion-icon">📽️</div>
+                        <small>Projector</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="suggestion-item">
+                        <div class="suggestion-icon">💡</div>
+                        <small>Decoration Lights</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="suggestion-item">
+                        <div class="suggestion-icon">🏛️</div>
+                        <small>Main Hall</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Events Suggestions -->
+        <div class="suggestion-category glass p-4 mb-4">
+            <h5 style="color: #60A5FA;">💻 For Technical Events</h5>
+            <div class="row mt-3">
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="suggestion-item">
+                        <div class="suggestion-icon">💻</div>
+                        <small>Laptops</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="suggestion-item">
+                        <div class="suggestion-icon">📊</div>
+                        <small>Projector Screen</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="suggestion-item">
+                        <div class="suggestion-icon">🔊</div>
+                        <small>PA System</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="suggestion-item">
+                        <div class="suggestion-icon">⚡</div>
+                        <small>Power Strips</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cultural Events Suggestions -->
+        <div class="suggestion-category glass p-4">
+            <h5 style="color: #60A5FA;">🎭 For Cultural Events</h5>
+            <div class="row mt-3">
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="suggestion-item">
+                        <div class="suggestion-icon">🎵</div>
+                        <small>Sound System</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="suggestion-item">
+                        <div class="suggestion-icon">✨</div>
+                        <small>Stage Lights</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="suggestion-item">
+                        <div class="suggestion-icon">🎪</div>
+                        <small>Decoration Items</small>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="suggestion-item">
+                        <div class="suggestion-icon">🪑</div>
+                        <small>Chairs & Tables</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- MODAL -->
+<div id="bookingOverlay" class="modal-overlay">
+    <div class="booking-modal">
+
+        <button class="close-modal" onclick="closeBooking()">&times;</button>
+
+        <h3 id="modalResourceTitle" style="color:#60A5FA; margin-bottom:14px;">
+            Book Resource
+        </h3>
+
+        <form id="bookingForm">
+
+            <input type="hidden" name="resource_id" id="modalResourceID">
+
+            <input class="modal-input" name="name" placeholder="Your Name" required>
+            <input class="modal-input" name="regno" placeholder="Registration No" required>
+            <input class="modal-input" type="email" name="email" placeholder="Email" required>
+            <input class="modal-input" name="mobile" placeholder="Mobile">
+
+            <select class="modal-input" name="branch" required>
+                <option value="">Select Branch</option>
+                <option>CS</option>
+                <option>IT</option>
+                <option>ECE</option>
+                <option>ME</option>
+                <option>CE</option>
+            </select>
+
+            <select class="modal-input" name="year" required>
+                <option value="">Select Year</option>
+                <option>1st</option>
+                <option>2nd</option>
+                <option>3rd</option>
+                <option>4th</option>
+            </select>
+
+            <input class="modal-input" type="date" name="start_date" required>
+            <input class="modal-input" type="date" name="end_date" required>
+
+            <input class="modal-input" name="event_name" placeholder="Event Name">
+            <textarea class="modal-input" name="purpose" placeholder="Purpose" style="min-height: 80px; resize: vertical;"></textarea>
+
+            <button class="modal-submit">Submit Booking</button>
+        </form>
+
+    </div>
+</div>
+
+
+<!-- JAVASCRIPT -->
+<script>
+function openBooking(id, name) {
+    document.getElementById("modalResourceID").value = id;
+    document.getElementById("modalResourceTitle").innerText = "Book " + name;
+    document.getElementById("bookingOverlay").style.display = "flex";
+}
+
+function closeBooking() {
+    document.getElementById("bookingOverlay").style.display = "none";
+}
+
+// AJAX submit
+document.getElementById("bookingForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    const fd = new FormData(this);
+
+    const res = await fetch("/book-resource", {
+        method: "POST",
+        body: fd
+    });
+
+    if(res.ok) {
+        alert("Booking Submitted!");
+        closeBooking();
+        this.reset();
+    } else {
+        alert("Failed to submit booking");
+    }
+});
+</script>
+
+<div class="credit">
+    Made with 💙 by <strong><a href="https://portfolio-shaista.netlify.app/" target="_blank" rel="noopener noreferrer">Shaista</a></strong>
+</div>
+
+{% endblock %}

@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% block title %}Events - College Event Portal{% endblock %}
+{% block content %}
+
+<style>
+.events-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.events-title {
+    color: var(--neon);
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.filter-box {
+    background: rgba(255,255,255,0.03);
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.07);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+}
+
+.event-card-wrapper {
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.event-card-wrapper:hover {
+    transform: translateY(-10px);
+}
+
+.event-card {
+    background: rgba(255,255,255,0.04);
+    border-radius: 14px;
+    padding: 0;
+    border: 1px solid rgba(255,255,255,0.1);
+    height: 100%;
+    overflow: hidden;
+}
+
+.event-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 14px 14px 0 0;
+}
+
+.event-card-body {
+    padding: 16px;
+}
+
+.event-title {
+    color: var(--neon);
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin: 10px 0 5px 0;
+}
+
+.event-meta {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+}
+</style>
+
+<div class="events-header" data-aos="fade-down">
+    <div class="events-title">Browse Events</div>
+    <p class="small-muted">Find technical, non-technical, expo, hackathons & more.</p>
+</div>
+
+<!-- FILTER BOX -->
+<div class="filter-box mb-4" data-aos="fade-up">
+    <form class="row g-3" method="get" action="{{ url_for('events_bp.list_events') }}">
+        <!-- Search -->
+        <div class="col-md-4">
+            <input type="text"
+                   class="form-control"
+                   name="q"
+                   value="{{ q }}"
+                   placeholder="Search events...">
+        </div>
+
+        <!-- Category -->
+        <div class="col-md-3">
+            <select name="category" class="form-control">
+                <option value="">All Categories</option>
+                <option value="Ripples" {% if category=='Ripples' %}selected{% endif %}>Ripples</option>
+                <option value="Technical" {% if category=='Technical' %}selected{% endif %}>Technical</option>
+                <option value="Non-Technical" {% if category=='Non-Technical' %}selected{% endif %}>Non-Technical</option>
+                <option value="Hackathons" {% if category=='Hackathons' %}selected{% endif %}>Hackathons</option>
+                <option value="Expo" {% if category=='Expo' %}selected{% endif %}>Expo</option>
+                <option value="Freshers" {% if category=='Freshers' %}selected{% endif %}>Freshers</option>
+                <option value="Farewell" {% if category=='Farewell' %}selected{% endif %}>Farewell</option>
+            </select>
+        </div>
+
+        <!-- Sort -->
+        <div class="col-md-3">
+            <select name="sort" class="form-control">
+                <option value="date" {% if sort=='date' %}selected{% endif %}>Sort by Date</option>
+                <option value="title_asc" {% if sort=='title_asc' %}selected{% endif %}>A → Z</option>
+                <option value="title_desc" {% if sort=='title_desc' %}selected{% endif %}>Z → A</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <button class="btn btn-gradient" style="width:100%;">Apply</button>
+        </div>
+    </form>
+</div>
+
+<style>
+/* Ensure the search input in the filter is visible and not fully white on focus */
+.filter-box .form-control {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text);
+}
+.filter-box .form-control:focus {
+    background: rgba(255,255,255,0.09);
+    color: var(--text);
+    box-shadow: 0 8px 30px rgba(6,182,212,0.06);
+}
+.filter-box .form-control::placeholder {
+    color: rgba(226,232,240,0.56);
+}
+</style>
+
+<!-- EVENTS GRID -->
+<div class="row g-4">
+    {% for event in events %}
+    <div class="col-md-4 col-sm-6" data-aos="zoom-in">
+        <div class="event-card-wrapper">
+            <div class="event-card glass">
+                <!-- Event Image -->
+                <img src="{{ url_for('static', filename='img/' ~ (event.image or 'placeholder.jpg')) }}"
+                     alt="{{ event.title }}">
+
+                <!-- Card Body -->
+                <div class="event-card-body">
+                    <div class="event-title">{{ event.title }}</div>
+                    <div class="event-meta">
+                        📅 {{ event.date | default('TBA') }} <br>
+                        📍 {{ event.location | default('TBA') }}
+                    </div>
+
+                    <p class="small-muted" style="margin-top:8px; margin-bottom:12px;">
+                        {{ event.description_short | default('') }}
+                    </p>
+
+                    <!-- Action Buttons -->
+                    <div class="card-actions">
+                        <a href="{{ url_for('events_bp.event_detail', event_id=event.id) }}"
+                           class="btn btn-gradient"
+                           style="width:100%; margin-bottom:8px;">
+                           View More
+                        </a>
+                        <!-- Register button removed as requested -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center">
+        <p class="small-muted">No events found. Try different filters.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Registration Modal -->
+<div class="modal fade" id="registerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: rgba(15,23,42,0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <h5 class="modal-title" style="color: var(--neon);">Register for Event</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="registerForm">
+                    <input type="hidden" name="event_id" id="modalEventId">
+                    <div class="mb-3">
+                        <input type="text" name="name" class="form-control" placeholder="Your Name" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" name="regno" class="form-control" placeholder="Registration Number" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="email" name="email" class="form-control" placeholder="Email" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" name="mobile" class="form-control" placeholder="Mobile Number">
+                    </div>
+                    <div class="mb-3">
+                        <select name="year" class="form-control" required>
+                            <option value="">Select Year</option>
+                            <option>1st</option>
+                            <option>2nd</option>
+                            <option>3rd</option>
+                            <option>4th</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-gradient w-100">Submit Registration</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center small-muted mt-5">
+    Crafted with 💙 by <strong><a href="https://portfolio-shaista.netlify.app/" target="_blank" rel="noopener noreferrer">Shaista</a></strong>
+</div>
+
+<script>
+// Registration modal functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const registerForm = document.getElementById('registerForm');
+    
+    registerForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        try {
+            const response = await fetch('/register-event', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('✅ Registration successful!');
+                bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide();
+                registerForm.reset();
+            } else {
+                alert('❌ Error: ' + result.error);
+            }
+        } catch (error) {
+            alert('❌ Registration failed. Please try again.');
+            console.error('Error:', error);
+        }
+    });
+});
+
+// Function to open registration modal
+function openRegister(eventId, eventTitle) {
+    document.getElementById('modalEventId').value = eventId;
+    document.querySelector('#registerModal .modal-title').textContent = 'Register for ' + eventTitle;
+    new bootstrap.Modal(document.getElementById('registerModal')).show();
+}
+</script>
+
+{% endblock %}

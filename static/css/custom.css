@@ -1,0 +1,320 @@
+/* ============================================================
+   SHAISTA • ADVANCED UI — AMOGHA DARK NEON STYLE 
+   Global Theme Variables
+   ============================================================ */
+
+:root {
+    /* Neon theme colors */
+    --bg-dark: #060b18;
+    --bg-card: rgba(255,255,255,0.03);
+    --bg-glass: rgba(255,255,255,0.05);
+
+    --neon: #60A5FA;
+    --neon2: #06B6D4;
+    --neon3: #3B82F6;
+
+    --text: #E2E8F0;
+    --muted: #94A3B8;
+
+    --border-glow: rgba(96,165,250,0.35);
+    --shadow-deep: 0 18px 60px rgba(0,0,0,0.55);
+
+    --radius: 16px;
+}
+
+/* ============================================================
+   RESET + GLOBAL
+   ============================================================ */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: radial-gradient(circle at 20% 20%, #071528, #050d1d 60%);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+}
+
+a {
+    text-decoration: none;
+}
+
+img {
+    user-select: none;
+}
+
+/* ============================================================
+   CONTAINERS + LAYOUT
+   ============================================================ */
+
+.container {
+    max-width: 1250px;
+    padding: 0 20px;
+}
+
+.glass {
+    background: var(--bg-glass);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-deep);
+    backdrop-filter: blur(10px);
+}
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+
+.navbar {
+    background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    padding: 14px 22px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+}
+
+.brand {
+    color: var(--neon);
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+/* Customize the mobile hamburger icon so it's visible on dark background */
+.navbar-toggler {
+    border: none;
+}
+.navbar-toggler-icon {
+    display: inline-block;
+    width: 30px;
+    height: 18px;
+    /* three bars using background gradients */
+    background-image:
+        linear-gradient(currentColor, currentColor),
+        linear-gradient(currentColor, currentColor),
+        linear-gradient(currentColor, currentColor);
+    background-size: 100% 2px;
+    background-position: 0 0, 0 8px, 0 16px;
+    background-repeat: no-repeat;
+    color: rgba(226,232,240,0.78); /* slightly muted white */
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.btn-gradient {
+    background: linear-gradient(90deg, var(--neon3), var(--neon2));
+    color: #001219;
+    padding: 12px 26px;
+    font-weight: 700;
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(59,130,246,0.25);
+    transition: all 0.25s ease;
+}
+
+.btn-gradient:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 22px 60px rgba(6,182,212,0.32);
+}
+
+.btn-outline-light {
+    border-radius: 14px !important;
+}
+
+/* ============================================================
+   INPUTS & SELECT
+   ============================================================ */
+
+.input, input[type="text"], input[type="email"], select, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text);
+    border-radius: 12px;
+    outline: none;
+}
+
+.input::placeholder {
+    color: var(--muted);
+}
+
+/* Make select dropdown options visible on dark theme when opened */
+select, .input, .modal-input, .form-control {
+    color: var(--text);
+}
+
+/* Dropdown options (rendered by browser) - give light background + dark text for readability */
+select option {
+    color: #031018;
+    background: #f6fbff;
+}
+
+/* Slightly brighter placeholder for important search boxes */
+.filter-box .form-control::placeholder {
+    color: rgba(226,232,240,0.55);
+}
+
+/* ============================================================
+   EVENT CARDS
+   ============================================================ */
+
+.event-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: all .3s ease;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.4);
+}
+
+.event-card:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    border-color: var(--border-glow);
+}
+
+.event-card .img {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    filter: brightness(1.1) saturate(1.05);
+}
+
+.event-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.event-meta {
+    font-size: .85rem;
+    color: var(--muted);
+}
+
+/* ============================================================
+   SPLIT PANELS (HOME PAGE)
+   ============================================================ */
+
+.split-row {
+    display: flex;
+    gap: 20px;
+}
+
+.split-card {
+    padding: 28px;
+    text-align: center;
+    min-height: 200px;
+    border-radius: var(--radius);
+    transition: all .3s ease;
+}
+
+.split-card:hover {
+    transform: translateY(-8px);
+}
+
+/* ============================================================
+   RESOURCES PAGE — ITEM CARD
+   ============================================================ */
+
+.resource-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 18px;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+    text-align: center;
+    transition: all .3s ease;
+}
+
+.resource-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--border-glow);
+}
+
+/* ============================================================
+   ADMIN PANEL
+   ============================================================ */
+
+.admin-panel {
+    padding: 18px;
+    background: rgba(255,255,255,0.04);
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.08);
+    text-align: center;
+}
+
+.admin-panel h5 {
+    color: var(--neon);
+}
+
+/* ============================================================
+   MODAL POPUP (glass, blurred)
+   ============================================================ */
+
+.modal-content {
+    background: rgba(12,16,32,0.95);
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 22px 70px rgba(0,0,0,0.7);
+}
+
+.modal-backdrop.show {
+    backdrop-filter: blur(8px);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 900px) {
+    .split-row {
+        flex-direction: column;
+    }
+    .event-card .img {
+        height: 160px;
+    }
+}
+
+@media (max-width: 600px) {
+    .navbar {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+}
+/* Smooth theme transition */
+.theme-transition {
+    transition: background 0.4s ease, color 0.4s ease;
+}
+
+/* Dark mode overrides */
+.dark-mode {
+    background: #0a0f1b !important;
+    color: #e2e8f0 !important;
+}
+
+.dark-mode .navbar,
+.dark-mode .glass,
+.dark-mode .event-card,
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea {
+    background: rgba(255,255,255,0.05) !important;
+    color: #e2e8f0 !important;
+}
+
+.dark-mode .btn-outline-light {
+    border-color: #60A5FA !important;
+}
+
+.dark-mode .btn-gradient {
+    filter: brightness(0.9);
+}
+
+.dark-mode footer {
+    color: #94A3B8 !important;
+}

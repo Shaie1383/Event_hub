@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.dashboard-section {
+    margin-top: 28px;
+}
+
+.section-title {
+    color: var(--neon);
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.dash-card {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 26px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+}
+
+.table-dark-custom {
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.table-dark-custom thead {
+    background: rgba(255,255,255,0.06);
+    color: var(--text);
+}
+
+.table-dark-custom tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.table-dark-custom td {
+    color: var(--muted);
+}
+
+.btn-approve {
+    background: #22c55e;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    color: #06121e;
+    font-weight: 600;
+    transition: 0.25s ease;
+}
+.btn-approve:hover {
+    transform: scale(1.05);
+}
+
+.btn-reject {
+    background: #ef4444;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    color: #06121e;
+    font-weight: 600;
+    transition: 0.25s ease;
+}
+.btn-reject:hover {
+    transform: scale(1.05);
+}
+
+.stat-box {
+    padding: 22px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.07);
+    text-align: center;
+    transition: 0.25s ease;
+}
+.stat-box:hover {
+    transform: translateY(-6px);
+}
+.stat-number {
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--neon);
+}
+.stat-label {
+    color: var(--muted);
+}
+
+.credit {
+    margin-top: 20px;
+    text-align: center;
+    color: var(--muted);
+}
+</style>
+
+
+<div data-aos="fade-up">
+    <h1 class="section-title">Admin Dashboard</h1>
+    <p class="small-muted">Manage bookings, registrations & resources</p>
+</div>
+
+
+<!-- =================================================== -->
+<!-- DASHBOARD SUMMARY CARDS -->
+<!-- =================================================== -->
+<div class="row mt-4 g-4">
+
+    <div class="col-md-3" data-aos="fade-up">
+        <div class="stat-box glass">
+            <div class="stat-number">{{ bookings|length }}</div>
+            <div class="stat-label">Total Bookings</div>
+        </div>
+    </div>
+
+    <div class="col-md-3" data-aos="fade-up">
+        <div class="stat-box glass">
+            <div class="stat-number">{{ regs|length }}</div>
+            <div class="stat-label">Event Registrations</div>
+        </div>
+    </div>
+
+    <div class="col-md-3" data-aos="fade-up">
+        <div class="stat-box glass">
+            <div class="stat-number">{{ resources|length }}</div>
+            <div class="stat-label">Resources</div>
+        </div>
+    </div>
+
+    <div class="col-md-3" data-aos="fade-up">
+        <div class="stat-box glass">
+            <div class="stat-number">{{ events|length }}</div>
+            <div class="stat-label">Events</div>
+        </div>
+    </div>
+
+</div>
+
+
+
+<!-- =================================================== -->
+<!-- PENDING BOOKINGS -->
+<!-- =================================================== -->
+<div class="dashboard-section" data-aos="fade-up">
+    <h2 class="section-title">Pending Resource Bookings</h2>
+
+    <div class="dash-card">
+
+        <table class="table-dark-custom table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Resource</th>
+                    <th>Event</th>
+                    <th>Requested Dates</th>
+                    <th>Status</th>
+                    <th style="width:160px;">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for b in bookings %}
+                <tr>
+                    <td>{{ b.id }}</td>
+                    <td>{{ b.resource.name if b.resource else 'Unknown' }}</td>
+                    <td>{{ b.event_name }}</td>
+                    <td>{{ b.start_date }} → {{ b.end_date }}</td>
+                    <td>{{ b.status }}</td>
+                    <td>
+                        <a href="{{ url_for('admin_bp.admin_approve', bid=b.id) }}" class="btn-approve">Approve</a>
+                        <a href="{{ url_for('admin_bp.admin_reject', bid=b.id) }}" class="btn-reject">Reject</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+
+
+<!-- =================================================== -->
+<!-- EVENT REGISTRATIONS -->
+<!-- =================================================== -->
+<div class="dashboard-section" data-aos="fade-up">
+    <h2 class="section-title">Event Registrations</h2>
+
+    <div class="dash-card">
+
+        <table class="table-dark-custom table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Event</th>
+                    <th>Name</th>
+                    <th>Reg No</th>
+                    <th>Email</th>
+                    <th>Registered At</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for r in regs %}
+                <tr>
+                    <td>{{ r.id }}</td>
+                    <td>{{ r.event.title if r.event else '—' }}</td>
+                    <td>{{ r.name }}</td>
+                    <td>{{ r.regno }}</td>
+                    <td>{{ r.email }}</td>
+                    <td>{{ r.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+
+
+<!-- =================================================== -->
+<!-- RESOURCE OVERVIEW -->
+<!-- =================================================== -->
+<div class="dashboard-section" data-aos="fade-up">
+    <h2 class="section-title">Resource Overview</h2>
+
+    <div class="dash-card">
+
+        <table class="table-dark-custom table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Resource</th>
+                    <th>Category</th>
+                    <th>Available Qty</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for r in resources %}
+                <tr>
+                    <td>{{ r.id }}</td>
+                    <td>{{ r.name }}</td>
+                    <td>{{ r.category }}</td>
+                    <td>{{ r.quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+
+<div class="credit">
+    Dashboard crafted with 💙 by <strong><a href="https://portfolio-shaista.netlify.app/" target="_blank" rel="noopener noreferrer">Shaista</a></strong>
+</div>
+
+{% endblock %}
