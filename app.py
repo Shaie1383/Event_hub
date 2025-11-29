@@ -70,6 +70,10 @@ def create_app(config_object=None):
         from flask import render_template
         return render_template("home.html")
 
+    @app.route('/favicon.ico')
+    def favicon():
+        return redirect(url_for('static', filename='img/favicon.ico'))
+
     # Add CLI helpers for initializing and seeding the DB
     @click.command("init-db")
     @with_appcontext
