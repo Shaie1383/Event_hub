@@ -132,15 +132,18 @@ def create_app(config_object=None):
 
 
 # Allow running this file directly for quick development
+# Create a top-level `app` so WSGI servers (gunicorn) can import it as `app:app`.
+app = create_app()
+
+
 if __name__ == "__main__":
-    application = create_app()
     # If the models exist, you can create tables automatically on first run:
     try:
-        with application.app_context():
+        with app.app_context():
             # Only attempt to auto-create tables if models are importable
             from models import db  # noqa
             db.create_all()
     except Exception:
-        application.logger.warning("Skipped automatic db.create_all() because models.py is missing or raised an error.")
+        app.logger.warning("Skipped automatic db.create_all() because models.py is missing or raised an error.")
     # Run the dev server
-    application.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
